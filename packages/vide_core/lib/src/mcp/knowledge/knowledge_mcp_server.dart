@@ -86,19 +86,17 @@ Example response:
 ```''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'scope': {
-            'type': 'string',
-            'description':
+          'scope': JsonSchema.string(
+            description:
                 'Optional scope filter: "global", "team:{name}", or "agent:{name}". If omitted, returns all documents.',
-          },
+          ),
         },
       ),
       callback: ({args, extra}) async {
         try {
           final scope = args?['scope'] as String?;
           final documents = await _service.getIndex(scope: scope);
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(
                 text: jsonEncode({
                   'documents': documents.map((d) => d.toJson()).toList(),
@@ -107,8 +105,7 @@ Example response:
             ],
           );
         } catch (e) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error getting knowledge index: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error getting knowledge index: $e')],
           );
         }
       },
@@ -124,18 +121,16 @@ Returns the document metadata plus its first paragraph as a summary.
 Use this when you need more context than the index provides but don't need the full content.''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'path': {
-            'type': 'string',
-            'description':
+          'path': JsonSchema.string(
+            description:
                 'Document path relative to knowledge root (e.g., "global/decisions/jwt-auth.md")',
-          },
+          ),
         },
         required: ['path'],
       ),
       callback: ({args, extra}) async {
         if (args == null || args['path'] == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: path is required')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: path is required')],
           );
         }
 
@@ -144,18 +139,12 @@ Use this when you need more context than the index provides but don't need the f
           final document = await _service.getSummary(docPath);
 
           if (document == null) {
-            return CallToolResult.fromContent(
-              content: [TextContent(text: 'Document not found: $docPath')],
-            );
+            return CallToolResult.fromContent([TextContent(text: 'Document not found: $docPath')]);
           }
 
-          return CallToolResult.fromContent(
-            content: [TextContent(text: jsonEncode(document.toJson()))],
-          );
+          return CallToolResult.fromContent([TextContent(text: jsonEncode(document.toJson()))]);
         } catch (e) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error getting document summary: $e')],
-          );
+          return CallToolResult.fromContent([TextContent(text: 'Error getting document summary: $e')]);
         }
       },
     );
@@ -170,18 +159,16 @@ Returns the complete document including all metadata and full markdown content.
 Use this when you need to understand a document in detail.''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'path': {
-            'type': 'string',
-            'description':
+          'path': JsonSchema.string(
+            description:
                 'Document path relative to knowledge root (e.g., "global/decisions/jwt-auth.md")',
-          },
+          ),
         },
         required: ['path'],
       ),
       callback: ({args, extra}) async {
         if (args == null || args['path'] == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: path is required')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: path is required')],
           );
         }
 
@@ -190,18 +177,12 @@ Use this when you need to understand a document in detail.''',
           final document = await _service.readDocument(docPath);
 
           if (document == null) {
-            return CallToolResult.fromContent(
-              content: [TextContent(text: 'Document not found: $docPath')],
-            );
+            return CallToolResult.fromContent([TextContent(text: 'Document not found: $docPath')]);
           }
 
-          return CallToolResult.fromContent(
-            content: [TextContent(text: jsonEncode(document.toJson()))],
-          );
+          return CallToolResult.fromContent([TextContent(text: jsonEncode(document.toJson()))]);
         } catch (e) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error reading document: $e')],
-          );
+          return CallToolResult.fromContent([TextContent(text: 'Error reading document: $e')]);
         }
       },
     );
@@ -234,41 +215,35 @@ writeKnowledge(
 ```''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'path': {
-            'type': 'string',
-            'description':
+          'path': JsonSchema.string(
+            description:
                 'Document path (e.g., "global/decisions/use-jwt.md", "teams/auth/findings/token-format.md")',
-          },
-          'title': {'type': 'string', 'description': 'Document title'},
-          'type': {
-            'type': 'string',
-            'description':
+          ),
+          'title': JsonSchema.string(description: 'Document title'),
+          'type': JsonSchema.string(
+            description:
                 'Document type: "decision", "finding", "pattern", or "learning"',
-          },
-          'content': {
-            'type': 'string',
-            'description':
+          ),
+          'content': JsonSchema.string(
+            description:
                 'Markdown content body (without frontmatter or title header)',
-          },
-          'tags': {
-            'type': 'array',
-            'items': {'type': 'string'},
-            'description': 'Optional tags for categorization',
-          },
-          'author': {'type': 'string', 'description': 'Optional author name'},
-          'references': {
-            'type': 'array',
-            'items': {'type': 'string'},
-            'description':
+          ),
+          'tags': JsonSchema.array(
+            items: JsonSchema.string(),
+            description: 'Optional tags for categorization',
+          ),
+          'author': JsonSchema.string(description: 'Optional author name'),
+          'references': JsonSchema.array(
+            items: JsonSchema.string(),
+            description:
                 'Optional code references (e.g., "lib/auth.dart:45")',
-          },
+          ),
         },
         required: ['path', 'title', 'type', 'content'],
       ),
       callback: ({args, extra}) async {
         if (args == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No arguments provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No arguments provided')],
           );
         }
 
@@ -281,8 +256,7 @@ writeKnowledge(
             title == null ||
             type == null ||
             content == null) {
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(
                 text: 'Error: path, title, type, and content are required',
               ),
@@ -302,14 +276,12 @@ writeKnowledge(
             references: (args['references'] as List?)?.cast<String>(),
           );
 
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(text: 'Knowledge document written: $docPath'),
             ],
           );
         } catch (e) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error writing document: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error writing document: $e')],
           );
         }
       },
@@ -325,26 +297,22 @@ Searches document titles, tags, and content for matching keywords.
 Returns documents ranked by relevance with snippets showing where matches were found.''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'query': {
-            'type': 'string',
-            'description': 'Search query (keywords to search for)',
-          },
-          'scope': {
-            'type': 'string',
-            'description':
+          'query': JsonSchema.string(
+            description: 'Search query (keywords to search for)',
+          ),
+          'scope': JsonSchema.string(
+            description:
                 'Optional scope: "global", "team:{name}", or "agent:{name}"',
-          },
-          'limit': {
-            'type': 'integer',
-            'description': 'Maximum results to return (default: 10)',
-          },
+          ),
+          'limit': JsonSchema.integer(
+            description: 'Maximum results to return (default: 10)',
+          ),
         },
         required: ['query'],
       ),
       callback: ({args, extra}) async {
         if (args == null || args['query'] == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: query is required')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: query is required')],
           );
         }
 
@@ -359,8 +327,7 @@ Returns documents ranked by relevance with snippets showing where matches were f
             limit: limit,
           );
 
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(
                 text: jsonEncode({
                   'results': results.map((r) => r.toJson()).toList(),
@@ -370,8 +337,7 @@ Returns documents ranked by relevance with snippets showing where matches were f
             ],
           );
         } catch (e) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error searching knowledge: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error searching knowledge: $e')],
           );
         }
       },
@@ -387,22 +353,19 @@ Returns documents matching the specified filters.
 More targeted than getKnowledgeIndex when you know what type of knowledge you need.''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'scope': {
-            'type': 'string',
-            'description':
+          'scope': JsonSchema.string(
+            description:
                 'Optional scope: "global", "team:{name}", or "agent:{name}"',
-          },
-          'type': {
-            'type': 'string',
-            'description':
+          ),
+          'type': JsonSchema.string(
+            description:
                 'Filter by type: "decision", "finding", "pattern", "learning"',
-          },
-          'tags': {
-            'type': 'array',
-            'items': {'type': 'string'},
-            'description':
+          ),
+          'tags': JsonSchema.array(
+            items: JsonSchema.string(),
+            description:
                 'Filter by tags (documents must have at least one matching tag)',
-          },
+          ),
         },
       ),
       callback: ({args, extra}) async {
@@ -417,8 +380,7 @@ More targeted than getKnowledgeIndex when you know what type of knowledge you ne
             tags: tags,
           );
 
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(
                 text: jsonEncode({
                   'documents': documents.map((d) => d.toJson()).toList(),
@@ -428,8 +390,7 @@ More targeted than getKnowledgeIndex when you know what type of knowledge you ne
             ],
           );
         } catch (e) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error listing knowledge: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error listing knowledge: $e')],
           );
         }
       },

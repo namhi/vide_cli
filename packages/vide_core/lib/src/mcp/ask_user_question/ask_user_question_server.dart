@@ -54,69 +54,57 @@ Returns a map of question text -> selected answer(s).
 For open-ended questions, just ask in regular text instead.''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'questions': {
-            'type': 'array',
-            'description': 'List of questions to ask (1-4 questions)',
-            'items': {
-              'type': 'object',
-              'properties': {
-                'question': {
-                  'type': 'string',
-                  'description': 'The question text',
-                },
-                'header': {
-                  'type': 'string',
-                  'description': 'Optional header/category for the question',
-                },
-                'multiSelect': {
-                  'type': 'boolean',
-                  'description':
+          'questions': JsonSchema.array(
+            description: 'List of questions to ask (1-4 questions)',
+            items: JsonSchema.object(
+              properties: {
+                'question': JsonSchema.string(
+                  description: 'The question text',
+                ),
+                'header': JsonSchema.string(
+                  description: 'Optional header/category for the question',
+                ),
+                'multiSelect': JsonSchema.boolean(
+                  description:
                       'If true, user can select multiple options. Default: false',
-                },
-                'options': {
-                  'type': 'array',
-                  'description':
+                ),
+                'options': JsonSchema.array(
+                  description:
                       'List of options (2-4 options). Put recommended option first.',
-                  'items': {
-                    'type': 'object',
-                    'properties': {
-                      'label': {
-                        'type': 'string',
-                        'description':
+                  items: JsonSchema.object(
+                    properties: {
+                      'label': JsonSchema.string(
+                        description:
                             'Short option label (1-5 words). Add "(Recommended)" for preferred option.',
-                      },
-                      'description': {
-                        'type': 'string',
-                        'description': 'Explanation of what this option means',
-                      },
+                      ),
+                      'description': JsonSchema.string(
+                        description: 'Explanation of what this option means',
+                      ),
                     },
-                    'required': ['label', 'description'],
-                  },
-                },
+                    required: ['label', 'description'],
+                  ),
+                ),
               },
-              'required': ['question', 'options'],
-            },
-          },
+              required: ['question', 'options'],
+            ),
+          ),
         },
         required: ['questions'],
       ),
       callback: ({args, extra}) async {
         if (args == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No arguments provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No arguments provided')],
           );
         }
 
         final questionsJson = args['questions'] as List<dynamic>?;
         if (questionsJson == null || questionsJson.isEmpty) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No questions provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No questions provided')],
           );
         }
 
         if (questionsJson.length > 4) {
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(text: 'Error: Maximum 4 questions allowed per call'),
             ],
           );
@@ -132,22 +120,18 @@ For open-ended questions, just ask in regular text instead.''',
           // Validate options count
           for (final q in questions) {
             if (q.options.length < 2) {
-              return CallToolResult.fromContent(
-                content: [
-                  TextContent(
-                    text: 'Error: Each question must have at least 2 options',
-                  ),
-                ],
-              );
+              return CallToolResult.fromContent([
+                TextContent(
+                  text: 'Error: Each question must have at least 2 options',
+                ),
+              ]);
             }
             if (q.options.length > 4) {
-              return CallToolResult.fromContent(
-                content: [
-                  TextContent(
-                    text: 'Error: Each question can have at most 4 options',
-                  ),
-                ],
-              );
+              return CallToolResult.fromContent([
+                TextContent(
+                  text: 'Error: Each question can have at most 4 options',
+                ),
+              ]);
             }
           }
 
@@ -160,8 +144,7 @@ For open-ended questions, just ask in regular text instead.''',
             jsonResponse[entry.key] = entry.value;
           }
 
-          return CallToolResult.fromContent(
-            content: [TextContent(text: jsonEncode(jsonResponse))],
+          return CallToolResult.fromContent([TextContent(text: jsonEncode(jsonResponse))],
           );
         } catch (e, stackTrace) {
           await Sentry.configureScope((scope) {
@@ -172,8 +155,7 @@ For open-ended questions, just ask in regular text instead.''',
             });
           });
           await Sentry.captureException(e, stackTrace: stackTrace);
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error asking user: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error asking user: $e')],
           );
         }
       },

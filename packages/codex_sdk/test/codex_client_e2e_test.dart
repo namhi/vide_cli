@@ -21,7 +21,7 @@ class TestMcpServer extends McpServerBase {
       callback: ({args, extra}) async {
         callCount++;
         return CallToolResult.fromContent(
-          content: [TextContent(text: 'pong')],
+          [TextContent(text: 'pong')],
         );
       },
     );

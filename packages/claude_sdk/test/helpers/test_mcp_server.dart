@@ -22,7 +22,7 @@ class TestMcpServer extends McpServerBase {
         description: 'Test tool: $toolName',
         toolInputSchema: ToolInputSchema(properties: {}, required: []),
         callback: ({args, extra}) async =>
-            CallToolResult.fromContent(content: [TextContent(text: 'OK')]),
+            CallToolResult.fromContent([TextContent(text: 'OK')]),
       );
     }
   }
@@ -57,7 +57,7 @@ class SpyMcpServer extends McpServerBase {
       description: 'Spy tool',
       toolInputSchema: ToolInputSchema(properties: {}, required: []),
       callback: ({args, extra}) async =>
-          CallToolResult.fromContent(content: [TextContent(text: 'spied')]),
+          CallToolResult.fromContent([TextContent(text: 'spied')]),
     );
   }
 

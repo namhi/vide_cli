@@ -80,43 +80,37 @@ personality name (e.g., 'solid-implementer', 'creative-explorer', 'deep-research
 Returns the ID of the newly spawned agent which can be used with sendMessageToAgent.''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'agentType': {
-            'type': 'string',
-            'description':
+          'agentType': JsonSchema.string(
+            description:
                 'The agent type/personality to spawn from the current team '
                 '(e.g., "solid-implementer", "creative-explorer", "deep-researcher"). '
                 'Cannot spawn "lead" - that is the main agent.',
-          },
-          'name': {
-            'type': 'string',
-            'description':
+          ),
+          'name': JsonSchema.string(
+            description:
                 'A short, descriptive name for the agent (e.g., "Auth Research", "DB Fix", "UI Tests"). This will be displayed in the UI.',
-          },
-          'initialPrompt': {
-            'type': 'string',
-            'description':
+          ),
+          'initialPrompt': JsonSchema.string(
+            description:
                 'The initial message/task to send to the new agent. Be specific and provide all necessary context.',
-          },
-          'workingDirectory': {
-            'type': 'string',
-            'description':
+          ),
+          'workingDirectory': JsonSchema.string(
+            description:
                 'Optional working directory for this agent. If not provided, '
                 'uses the session working directory. Use this to spawn an agent '
                 'in a different directory (e.g., a git worktree).',
-          },
-          'harness': {
-            'type': 'string',
-            'description':
+          ),
+          'harness': JsonSchema.string(
+            description:
                 'Optional harness override (e.g., "claude-code", "codex-cli"). '
                 'If not provided, uses the personality default or session default.',
-          },
+          ),
         },
         required: ['agentType', 'name', 'initialPrompt'],
       ),
       callback: ({args, extra}) async {
         if (args == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No arguments provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No arguments provided')],
           );
         }
 
@@ -151,8 +145,7 @@ Returns the ID of the newly spawned agent which can be used with sendMessageToAg
             sessionId: networkId,
           );
 
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(
                 text:
                     'Successfully spawned "$agentType" agent "$name".\n'
@@ -178,8 +171,7 @@ Returns the ID of the newly spawned agent which can be used with sendMessageToAg
             });
           });
           await Sentry.captureException(e, stackTrace: stackTrace);
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error spawning agent: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error spawning agent: $e')],
           );
         }
       },
@@ -198,21 +190,18 @@ a message to you, which will "wake you up" with their response.
 Use this to coordinate with other agents in the network.''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'targetAgentId': {
-            'type': 'string',
-            'description': 'The ID of the agent to send the message to',
-          },
-          'message': {
-            'type': 'string',
-            'description': 'The message to send to the agent',
-          },
+          'targetAgentId': JsonSchema.string(
+            description: 'The ID of the agent to send the message to',
+          ),
+          'message': JsonSchema.string(
+            description: 'The message to send to the agent',
+          ),
         },
         required: ['targetAgentId', 'message'],
       ),
       callback: ({args, extra}) async {
         if (args == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No arguments provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No arguments provided')],
           );
         }
 
@@ -234,8 +223,7 @@ Use this to coordinate with other agents in the network.''',
             sentBy: callerAgentId,
           );
 
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(
                 text:
                     'Message sent to agent $targetAgentId.\n'
@@ -258,8 +246,7 @@ Use this to coordinate with other agents in the network.''',
             });
           });
           await Sentry.captureException(e, stackTrace: stackTrace);
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error sending message: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error sending message: $e')],
           );
         }
       },
@@ -279,18 +266,16 @@ Call this when:
 - You are actively working (default, usually set automatically): "working"''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'status': {
-            'type': 'string',
-            'enum': ['working', 'waitingForAgent', 'waitingForUser', 'idle'],
-            'description': 'The current status of the agent',
-          },
+          'status': JsonSchema.string(
+            enumValues: ['working', 'waitingForAgent', 'waitingForUser', 'idle'],
+            description: 'The current status of the agent',
+          ),
         },
         required: ['status'],
       ),
       callback: ({args, extra}) async {
         if (args == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No arguments provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No arguments provided')],
           );
         }
 
@@ -298,8 +283,7 @@ Call this when:
         final status = AgentStatusExtension.fromString(statusStr);
 
         if (status == null) {
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(
                 text:
                     'Error: Invalid status "$statusStr". Must be one of: working, waitingForAgent, waitingForUser, idle',
@@ -326,8 +310,7 @@ Call this when:
             _getStatusNotifier(callerAgentId).setStatus(status);
           }
 
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(
                 text: 'Agent status updated to: "${effectiveStatus.name}"',
               ),
@@ -343,8 +326,7 @@ Call this when:
             });
           });
           await Sentry.captureException(e, stackTrace: stackTrace);
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error updating agent status: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error updating agent status: $e')],
           );
         }
       },
@@ -365,21 +347,18 @@ The agent will be stopped, removed from the network, and will no longer appear i
 Any agent can terminate any other agent, including itself.''',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'targetAgentId': {
-            'type': 'string',
-            'description': 'The ID of the agent to terminate',
-          },
-          'reason': {
-            'type': 'string',
-            'description': 'Optional reason for termination (for logging)',
-          },
+          'targetAgentId': JsonSchema.string(
+            description: 'The ID of the agent to terminate',
+          ),
+          'reason': JsonSchema.string(
+            description: 'Optional reason for termination (for logging)',
+          ),
         },
         required: ['targetAgentId'],
       ),
       callback: ({args, extra}) async {
         if (args == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No arguments provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No arguments provided')],
           );
         }
 
@@ -402,8 +381,7 @@ Any agent can terminate any other agent, including itself.''',
           );
 
           final selfTerminated = targetAgentId == callerAgentId;
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(
                 text: selfTerminated
                     ? 'Successfully self-terminated. This agent has been removed from the network.'
@@ -426,8 +404,7 @@ Any agent can terminate any other agent, including itself.''',
             });
           });
           await Sentry.captureException(e, stackTrace: stackTrace);
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error terminating agent: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error terminating agent: $e')],
           );
         }
       },
@@ -441,18 +418,16 @@ Any agent can terminate any other agent, including itself.''',
           'Set or update the name/description of the current task. Call this as soon as you understand what the task is about to give it a clear, descriptive name. You can call this multiple times if your understanding of the task evolves.',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'taskName': {
-            'type': 'string',
-            'description':
+          'taskName': JsonSchema.string(
+            description:
                 'Clear, concise name describing what the task is about (e.g., "Add dark mode toggle", "Fix authentication bug", "Implement user profile page")',
-          },
+          ),
         },
         required: ['taskName'],
       ),
       callback: ({args, extra}) async {
         if (args == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No arguments provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No arguments provided')],
           );
         }
 
@@ -461,8 +436,7 @@ Any agent can terminate any other agent, including itself.''',
         try {
           await _networkManager.updateGoal(taskName);
 
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Task name updated to: "$taskName"')],
+          return CallToolResult.fromContent([TextContent(text: 'Task name updated to: "$taskName"')],
           );
         } catch (e, stackTrace) {
           await Sentry.configureScope((scope) {
@@ -473,8 +447,7 @@ Any agent can terminate any other agent, including itself.''',
             });
           });
           await Sentry.captureException(e, stackTrace: stackTrace);
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error updating task name: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error updating task name: $e')],
           );
         }
       },
@@ -488,18 +461,16 @@ Any agent can terminate any other agent, including itself.''',
           'Set or update the current task name for this agent. Use this to indicate what specific task this agent is currently working on. This is separate from the overall task name (setTaskName) which describes the entire network\'s goal.',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'taskName': {
-            'type': 'string',
-            'description':
+          'taskName': JsonSchema.string(
+            description:
                 'Clear, concise name describing what this agent is currently working on (e.g., "Researching auth patterns", "Implementing login form", "Running unit tests")',
-          },
+          ),
         },
         required: ['taskName'],
       ),
       callback: ({args, extra}) async {
         if (args == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No arguments provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No arguments provided')],
           );
         }
 
@@ -508,8 +479,7 @@ Any agent can terminate any other agent, including itself.''',
         try {
           await _networkManager.updateAgentTaskName(callerAgentId, taskName);
 
-          return CallToolResult.fromContent(
-            content: [
+          return CallToolResult.fromContent([
               TextContent(text: 'Agent task name updated to: "$taskName"'),
             ],
           );
@@ -522,8 +492,7 @@ Any agent can terminate any other agent, including itself.''',
             });
           });
           await Sentry.captureException(e, stackTrace: stackTrace);
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error updating agent task name: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error updating agent task name: $e')],
           );
         }
       },
@@ -537,24 +506,21 @@ Any agent can terminate any other agent, including itself.''',
           'Mark the current task as complete. This fires the onTaskComplete trigger which may spawn agents like code-reviewer depending on team configuration. Call this when the main task goal has been achieved.',
       toolInputSchema: ToolInputSchema(
         properties: {
-          'summary': {
-            'type': 'string',
-            'description':
+          'summary': JsonSchema.string(
+            description:
                 'Brief summary of what was accomplished (e.g., "Implemented JWT authentication with refresh tokens")',
-          },
-          'filesChanged': {
-            'type': 'array',
-            'items': {'type': 'string'},
-            'description':
+          ),
+          'filesChanged': JsonSchema.array(
+            items: JsonSchema.string(),
+            description:
                 'Optional list of files that were changed (e.g., ["lib/auth.dart", "test/auth_test.dart"])',
-          },
+          ),
         },
         required: ['summary'],
       ),
       callback: ({args, extra}) async {
         if (args == null) {
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error: No arguments provided')],
+          return CallToolResult.fromContent([TextContent(text: 'Error: No arguments provided')],
           );
         }
 
@@ -566,7 +532,7 @@ Any agent can terminate any other agent, including itself.''',
 
           if (network == null) {
             return CallToolResult.fromContent(
-              content: [TextContent(text: 'Error: No active network')],
+              [TextContent(text: 'Error: No active network')],
             );
           }
 
@@ -584,7 +550,7 @@ Any agent can terminate any other agent, including itself.''',
 
           if (spawnedAgentId != null) {
             return CallToolResult.fromContent(
-              content: [
+              [
                 TextContent(
                   text:
                       'Task marked complete: "$summary"\n'
@@ -594,7 +560,7 @@ Any agent can terminate any other agent, including itself.''',
             );
           } else {
             return CallToolResult.fromContent(
-              content: [
+              [
                 TextContent(
                   text:
                       'Task marked complete: "$summary"\n'
@@ -612,8 +578,7 @@ Any agent can terminate any other agent, including itself.''',
             });
           });
           await Sentry.captureException(e, stackTrace: stackTrace);
-          return CallToolResult.fromContent(
-            content: [TextContent(text: 'Error marking task complete: $e')],
+          return CallToolResult.fromContent([TextContent(text: 'Error marking task complete: $e')],
           );
         }
       },
