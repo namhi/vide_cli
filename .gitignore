@@ -35,3 +35,6 @@ specs/
 # Landing page
 landing/node_modules/
 .DS_Store
+
+# FVM Version Cache
+.fvm/

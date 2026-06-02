@@ -21,9 +21,10 @@ final teamFrameworkLoaderProvider = Provider<TeamFrameworkLoader>((ref) {
 /// Service for loading team framework definitions from markdown files.
 ///
 /// Loads from multiple sources with precedence (highest first):
-/// 1. Project-level: `.claude/teams/`, `.claude/roles/`, etc.
-/// 2. User customizations: `~/.vide/user/`
-/// 3. Vide defaults: `~/.vide/defaults/`
+/// 1. Project-level: `<project>/.claude/agents/`, etc.
+/// 2. Claude Code user-level: `~/.claude/agents/`, etc.
+/// 3. Vide user customizations: `~/.vide/user/`
+/// 4. Vide bundled defaults
 class TeamFrameworkLoader {
   TeamFrameworkLoader({String? workingDirectory, String? videHome})
     : _workingDirectory = workingDirectory ?? Directory.current.path,
@@ -385,7 +386,7 @@ $agentsList
     // 1. Bundled defaults (lowest precedence)
     _loadFromBundled(subdir, parser, getName, results);
 
-    // 2. User customizations
+    // 2. User customizations (~/.vide/user/)
     await _loadFromDirectory(
       path.join(_videHome, 'user', subdir),
       parser,
@@ -394,7 +395,19 @@ $agentsList
       'user',
     );
 
-    // 3. Project-level (highest precedence)
+    // 3. Claude Code user-level (~/.claude/agents/, etc.)
+    final claudeHome = Platform.environment['HOME'] ?? '';
+    if (claudeHome.isNotEmpty) {
+      await _loadFromDirectory(
+        path.join(claudeHome, '.claude', subdir),
+        parser,
+        getName,
+        results,
+        'claude-user',
+      );
+    }
+
+    // 4. Project-level (highest precedence)
     await _loadFromDirectory(
       path.join(_workingDirectory, '.claude', subdir),
       parser,
