@@ -528,7 +528,19 @@ class LocalVideSession implements VideSession {
   @override
   Stream<AgentConversationState> conversationStream(String agentId) {
     _checkNotDisposed();
-    return _conversationState.agentStream(agentId);
+    // Prepend the current state so new subscribers immediately receive it
+    // (like a BehaviorSubject). Without this, broadcast emissions during
+    // _initialize() are lost before the BLoC subscribes, causing
+    // "No messages yet" for resumed sessions.
+    final controller = StreamController<AgentConversationState>();
+    final currentState = _conversationState.getAgentState(agentId);
+    if (currentState != null) {
+      controller.add(currentState);
+    }
+    controller
+        .addStream(_conversationState.agentStream(agentId))
+        .whenComplete(controller.close);
+    return controller.stream;
   }
 
   @override
@@ -1384,6 +1396,11 @@ class LocalVideSession implements VideSession {
     );
 
     final currentConversation = client.currentConversation;
+    VideLogger.instance.info(
+      'LocalVideSession',
+      '_subscribeToAgent: agent=${agent.id} messages=${currentConversation.messages.length}',
+      sessionId: _networkId,
+    );
     if (currentConversation.messages.isNotEmpty) {
       _handleConversation(agent, currentConversation);
     }

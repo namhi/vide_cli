@@ -1298,7 +1298,18 @@ class RemoteVideSession implements VideSession {
 
   @override
   Stream<AgentConversationState> conversationStream(String agentId) {
-    return _conversationState.agentStream(agentId);
+    // Prepend the current state so new subscribers immediately receive it
+    // (like a BehaviorSubject). Without this, broadcast emissions before
+    // subscription are lost, causing "No messages yet" for resumed sessions.
+    final controller = StreamController<AgentConversationState>();
+    final currentState = _conversationState.getAgentState(agentId);
+    if (currentState != null) {
+      controller.add(currentState);
+    }
+    controller
+        .addStream(_conversationState.agentStream(agentId))
+        .whenComplete(controller.close);
+    return controller.stream;
   }
 
   @override

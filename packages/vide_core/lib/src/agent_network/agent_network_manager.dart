@@ -403,6 +403,33 @@ class AgentNetworkManager extends _$AgentNetworkManager {
       }
     }
 
+    // Await client initialization so conversation history is loaded from disk
+    // before the session is returned to callers. Without this, the BLoC
+    // subscribes to conversationStream before init() completes and misses the
+    // loaded history on broadcast streams.
+    final clients = ref.read(agentClientManagerProvider);
+    final initFutures = updatedNetwork.agents.map((agent) {
+      final client = clients[agent.id];
+      if (client == null) {
+        VideLogger.instance.warn(
+          'AgentNetworkManager',
+          'resume: no client for agent=${agent.id}',
+          sessionId: updatedNetwork.id,
+        );
+        return null;
+      }
+      return client.initialized.then((_) {
+        final msgCount = client.currentConversation.messages.length;
+        VideLogger.instance.info(
+          'AgentNetworkManager',
+          'resume: agent=${agent.id} initialized, messages=$msgCount, '
+          'sessionId=${client.sessionId}, cwd=${client.workingDirectory}',
+          sessionId: updatedNetwork.id,
+        );
+      });
+    }).whereType<Future<void>>();
+    await Future.wait(initFutures);
+
     // Agent status is purely runtime state. On resume, all agents start as idle
     // (the AgentStatusNotifier default) since no turns are running yet.
     // The status sync service will set them to working when a turn begins.

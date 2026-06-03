@@ -183,8 +183,9 @@ class ConversationLoader {
   /// Encode project path to match Claude Code's naming scheme
   /// Example: "/Users/foo/bar" -> "-Users-foo-bar"
   /// Example: "/Users/foo/bar_baz" -> "-Users-foo-bar-baz"
+  /// Example: "/Users/foo/.claude" -> "-Users-foo--claude"
   static String _encodeProjectPath(String path) {
-    return path.replaceAll('/', '-').replaceAll('_', '-');
+    return path.replaceAll(RegExp(r'[/_.]'), '-');
   }
 
   /// Get Claude Code's storage directory (~/.claude)

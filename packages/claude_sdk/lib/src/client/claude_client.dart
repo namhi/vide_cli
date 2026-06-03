@@ -338,38 +338,50 @@ class ClaudeClientImpl implements ClaudeClient {
       return;
     }
 
-    if (await ConversationLoader.hasConversation(
-      sessionId,
-      config.workingDirectory!,
-    )) {
-      final conversation = await ConversationLoader.loadHistoryForDisplay(
+    try {
+      if (await ConversationLoader.hasConversation(
         sessionId,
         config.workingDirectory!,
-      );
-      _currentConversation = conversation;
-      _conversationController.add(conversation);
-      // Existing conversation means we should use --resume for subsequent messages
-      _isFirstMessage = false;
-    }
-
-    _isInitialized = true;
-
-    // For resumed sessions (existing conversation loaded from disk),
-    // defer starting MCP servers and the Claude process until the user
-    // sends a message. This avoids unnecessary processing when just
-    // viewing history.
-    if (_isFirstMessage) {
-      // New session — start everything eagerly
-      for (int i = 0; i < mcpServers.length; i++) {
-        final server = mcpServers[i];
-        if (server.isRunning) continue;
-        await server.start();
+      )) {
+        final conversation = await ConversationLoader.loadHistoryForDisplay(
+          sessionId,
+          config.workingDirectory!,
+        );
+        _currentConversation = conversation;
+        _conversationController.add(conversation);
+        // Existing conversation means we should use --resume for subsequent messages
+        _isFirstMessage = false;
+        print('ClaudeClient.init(): loaded ${conversation.messages.length} messages '
+            'for session=$sessionId cwd=${config.workingDirectory}');
+      } else {
+        print('ClaudeClient.init(): no conversation file found '
+            'for session=$sessionId cwd=${config.workingDirectory}');
       }
 
-      await _startControlProtocol();
+      _isInitialized = true;
+
+      // For resumed sessions (existing conversation loaded from disk),
+      // defer starting MCP servers and the Claude process until the user
+      // sends a message. This avoids unnecessary processing when just
+      // viewing history.
+      if (_isFirstMessage) {
+        // New session — start everything eagerly
+        for (int i = 0; i < mcpServers.length; i++) {
+          final server = mcpServers[i];
+          if (server.isRunning) continue;
+          await server.start();
+        }
+
+        await _startControlProtocol();
+      }
+    } catch (e) {
+      // Conversation loading or process startup failed.
+      // Complete initialization anyway so callers don't hang on `initialized`.
+      // The client will start with an empty conversation — the user can retry.
+      print('ClaudeClient.init() failed for session=$sessionId: $e');
     }
 
-    // Signal that initialization is complete
+    // Signal that initialization is complete (always, even on error)
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete();
     }
