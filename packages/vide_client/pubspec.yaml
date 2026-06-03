@@ -11,7 +11,8 @@ dependencies:
   http: ^1.2.0
   meta: any
   uuid: any
-  vide_interface: any
+  vide_interface:
+    path: ../vide_interface
   web_socket_channel: ^3.0.0
 
 dev_dependencies:

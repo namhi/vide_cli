@@ -9,11 +9,11 @@ import '../../agent_network/agent_status_manager.dart';
 import '../../team_framework/trigger_service.dart';
 import 'package:riverpod/riverpod.dart';
 
-final ProviderFamily<AgentMCPServer, AgentId> agentServerProvider =
+final agentServerProvider =
     Provider.family<AgentMCPServer, AgentId>((ref, agentId) {
       return AgentMCPServer(
         callerAgentId: agentId,
-        networkManager: ref.watch(agentNetworkManagerProvider.notifier),
+        networkManager: ref.read(agentNetworkManagerProvider.notifier),
         getStatusNotifier: (id) => ref.read(agentStatusProvider(id).notifier),
         getTriggerService: () => ref.read(triggerServiceProvider),
       );

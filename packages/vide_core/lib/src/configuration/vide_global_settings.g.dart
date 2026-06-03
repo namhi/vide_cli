@@ -30,7 +30,7 @@ VideGlobalSettings _$VideGlobalSettingsFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$VideGlobalSettingsToJson(VideGlobalSettings instance) =>
     <String, dynamic>{
       'firstRunComplete': instance.firstRunComplete,
-      if (instance.theme case final value?) 'theme': value,
+      'theme': ?instance.theme,
       'enableStreaming': instance.enableStreaming,
       'autoUpdatesEnabled': instance.autoUpdatesEnabled,
       'dangerouslySkipPermissions': instance.dangerouslySkipPermissions,
@@ -41,9 +41,7 @@ Map<String, dynamic> _$VideGlobalSettingsToJson(VideGlobalSettings instance) =>
       'telemetryEnabled': instance.telemetryEnabled,
       'showThinking': instance.showThinking,
       'soundNotificationsEnabled': instance.soundNotificationsEnabled,
-      if (instance.customTaskCompleteSound case final value?)
-        'customTaskCompleteSound': value,
-      if (instance.customAttentionNeededSound case final value?)
-        'customAttentionNeededSound': value,
+      'customTaskCompleteSound': ?instance.customTaskCompleteSound,
+      'customAttentionNeededSound': ?instance.customAttentionNeededSound,
       'extremeTeamEnabled': instance.extremeTeamEnabled,
     };

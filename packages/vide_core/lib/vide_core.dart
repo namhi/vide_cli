@@ -34,6 +34,7 @@ export 'src/models/permission_mode.dart';
 // =============================================================================
 // Agent Network
 // =============================================================================
+export 'src/agent_network/agent_network_manager.dart';
 export 'src/agent_network/agent_status_manager.dart';
 export 'src/agent_network/agent_network_persistence_manager.dart';
 

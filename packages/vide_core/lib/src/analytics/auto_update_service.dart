@@ -5,9 +5,12 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../version.dart';
 import '../configuration/vide_config_manager.dart';
+
+part 'auto_update_service.g.dart';
 
 /// Represents the current state of the auto-update system
 enum UpdateStatus {
@@ -84,16 +87,18 @@ class UpdateState {
 }
 
 /// Service that handles checking for updates and downloading them
-class AutoUpdateService extends StateNotifier<UpdateState> {
-  final VideConfigManager _configManager;
-  final http.Client _httpClient;
+@riverpod
+class AutoUpdateService extends _$AutoUpdateService {
+  @override
+  UpdateState build() {
+    final configManager = ref.watch(videConfigManagerProvider);
+    _configManager = configManager;
+    _httpClient = http.Client();
+    return const UpdateState();
+  }
 
-  AutoUpdateService({
-    required VideConfigManager configManager,
-    http.Client? httpClient,
-  }) : _configManager = configManager,
-       _httpClient = httpClient ?? http.Client(),
-       super(const UpdateState());
+  late VideConfigManager _configManager;
+  late http.Client _httpClient;
 
   /// Directory where updates are staged
   String get _updatesDir => path.join(_configManager.configRoot, 'updates');
@@ -493,10 +498,3 @@ int _compareVersions(String v1, String v2) {
   }
   return 0;
 }
-
-/// Riverpod provider for AutoUpdateService
-final autoUpdateServiceProvider =
-    StateNotifierProvider<AutoUpdateService, UpdateState>((ref) {
-      final configManager = ref.watch(videConfigManagerProvider);
-      return AutoUpdateService(configManager: configManager);
-    });

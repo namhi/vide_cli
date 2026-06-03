@@ -48,8 +48,7 @@ class AgentIdAndMcpServerType {
       agentId.hashCode ^ mcpServerType.hashCode ^ projectPath.hashCode;
 }
 
-final ProviderFamily<McpServerBase, AgentIdAndMcpServerType>
-genericMcpServerProvider =
+final genericMcpServerProvider =
     Provider.family<McpServerBase, AgentIdAndMcpServerType>((ref, params) {
       return switch (params.mcpServerType) {
         McpServerType.agent => ref.watch(agentServerProvider(params.agentId)),
