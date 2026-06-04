@@ -328,13 +328,29 @@ class AgentNetworkManager extends _$AgentNetworkManager {
       sessionId: network.id,
     );
 
+    // Set state IMMEDIATELY with the original network to prevent flash of empty state.
+    // Team resolution and lastActiveAt update happen after — the state is updated again
+    // once we know the effective team.
+    state = AgentNetworkState(currentNetwork: network);
+
     // Check if the saved team exists, fall back to 'enterprise' if not
     var effectiveTeam = network.team;
-    final team = await _teamFrameworkLoader.getTeam(effectiveTeam);
-    if (team == null) {
+    try {
+      final team = await _teamFrameworkLoader.getTeam(effectiveTeam);
+      if (!ref.mounted) return;
+      if (team == null) {
+        VideLogger.instance.warn(
+          'AgentNetworkManager',
+          'Team "$effectiveTeam" not found, falling back to "enterprise"',
+          sessionId: network.id,
+        );
+        effectiveTeam = 'enterprise';
+      }
+    } catch (e) {
+      if (!ref.mounted) return;
       VideLogger.instance.warn(
         'AgentNetworkManager',
-        'Team "$effectiveTeam" not found, falling back to "enterprise"',
+        'Failed to load team "$effectiveTeam", falling back to "enterprise": $e',
         sessionId: network.id,
       );
       effectiveTeam = 'enterprise';
@@ -346,11 +362,12 @@ class AgentNetworkManager extends _$AgentNetworkManager {
       team: effectiveTeam,
     );
 
-    // Set state IMMEDIATELY before any async work to prevent flash of empty state
+    // Update state with resolved team info
     state = AgentNetworkState(currentNetwork: updatedNetwork);
 
     // Persist updated network (e.g. lastActiveAt)
     await ref.read(agentNetworkPersistenceManagerProvider).saveNetwork(updatedNetwork);
+    if (!ref.mounted) return;
 
     // Recreate agent clients for each agent in the network
     for (final agentMetadata in updatedNetwork.agents) {
@@ -360,6 +377,7 @@ class AgentNetworkManager extends _$AgentNetworkManager {
           teamName: updatedNetwork.team,
           harnessOverride: agentMetadata.harness,
         );
+        if (!ref.mounted) return;
         // Use sessionId if available (for forked agents), otherwise use agent id
         final sessionIdToUse = agentMetadata.sessionId ?? agentMetadata.id;
         final client = _factoryRegistry
@@ -371,6 +389,7 @@ class AgentNetworkManager extends _$AgentNetworkManager {
               agentType: agentMetadata.type,
               workingDirectory: agentMetadata.workingDirectory,
             );
+        if (!ref.mounted) return;
         ref.read(agentClientManagerProvider.notifier).addAgent(agentMetadata.id, client);
         // Set up status sync to auto-update agent status when turn completes
         _statusSyncService.setupStatusSync(agentMetadata.id, client);

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:riverpod/riverpod.dart';
+import 'package:nocterm_riverpod/nocterm_riverpod.dart';
 import '../../permissions/permission_scope.dart';
 import 'package:vide_core/vide_core.dart' as api;
 import 'vide_session_providers.dart';
@@ -98,7 +98,7 @@ _AggregatedStatus _getAggregatedStatus(Ref ref) {
     return _AggregatedStatus.needsAttention;
   }
 
-  final agents = agentsAsync.valueOrNull;
+  final agents = agentsAsync.value;
   if (agents == null || agents.isEmpty) {
     return _AggregatedStatus.idle;
   }

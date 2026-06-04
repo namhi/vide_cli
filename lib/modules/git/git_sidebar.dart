@@ -877,7 +877,7 @@ class _GitSidebarState extends State<GitSidebar>
     final gitStatusAsync = context.watch(
       gitStatusStreamProvider(component.repoPath),
     );
-    final gitStatus = gitStatusAsync.valueOrNull;
+    final gitStatus = gitStatusAsync.value;
     final itemBuilder = _buildItemBuilder();
     final navigableItems = itemBuilder.buildNavigableItems(context);
 
@@ -1250,7 +1250,7 @@ class _GitSidebarState extends State<GitSidebar>
           final statusAsync = context.watch(
             gitStatusStreamProvider(item.fullPath!),
           );
-          status = statusAsync.valueOrNull;
+          status = statusAsync.value;
         }
         return buildRepoHeaderRow(
           item: item,

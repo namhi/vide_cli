@@ -6,7 +6,7 @@
 
 import 'dart:io';
 
-import 'package:riverpod/riverpod.dart';
+import 'package:nocterm_riverpod/nocterm_riverpod.dart';
 import 'package:test/test.dart';
 import 'package:vide_core/vide_core.dart';
 import 'package:vide_core/src/agent_network/agent_network_manager.dart';
@@ -48,6 +48,8 @@ void main() {
     });
 
     tearDown(() async {
+      // Allow pending async work from resume() to settle before disposing
+      await Future<void>.delayed(Duration.zero);
       container.dispose();
       if (testTempDir.existsSync()) {
         await testTempDir.delete(recursive: true);
@@ -85,6 +87,13 @@ void main() {
 
       // Get the manager from the container (same container TUI uses)
       final manager = container.read(agentNetworkManagerProvider.notifier);
+
+      // Keep a subscription to prevent auto-dispose during async resume()
+      final sub = container.listen<AgentNetworkState>(
+        agentNetworkManagerProvider,
+        (_, __) {},
+        fireImmediately: false,
+      );
 
       // Verify state is empty before resume
       var state = container.read(agentNetworkManagerProvider);
@@ -160,6 +169,13 @@ void main() {
       );
 
       final manager = container.read(agentNetworkManagerProvider.notifier);
+
+      // Keep a subscription to prevent auto-dispose during async resume()
+      final sub = container.listen<AgentNetworkState>(
+        agentNetworkManagerProvider,
+        (_, __) {},
+        fireImmediately: false,
+      );
 
       try {
         await manager.resume(network);

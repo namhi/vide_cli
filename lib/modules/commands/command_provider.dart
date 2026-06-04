@@ -1,4 +1,4 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:nocterm_riverpod/nocterm_riverpod.dart';
 
 import 'command_registry.dart';
 import 'command_dispatcher.dart';

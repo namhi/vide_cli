@@ -1,4 +1,4 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:nocterm_riverpod/nocterm_riverpod.dart';
 
 import 'package:vide_cli/modules/toast/models/toast_data.dart';
 

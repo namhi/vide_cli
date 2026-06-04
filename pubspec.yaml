@@ -61,14 +61,9 @@ dev_dependencies:
 
 dependency_overrides:
   nocterm:
-    git:
-      url: https://github.com/Norbert515/nocterm.git
-      ref: v0.5.1
+    path: ../nocterm
   nocterm_riverpod:
-    git:
-      url: https://github.com/Norbert515/nocterm.git
-      ref: v0.5.1
-      path: packages/nocterm_riverpod
+    path: ../nocterm/packages/nocterm_riverpod
   riverpod: ^3.0.0
 
 melos:

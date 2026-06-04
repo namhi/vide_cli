@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:riverpod/riverpod.dart';
+import 'package:nocterm_riverpod/nocterm_riverpod.dart';
 import 'package:vide_core/vide_core.dart';
 
 import 'vide_session_providers.dart';

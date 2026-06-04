@@ -32,9 +32,9 @@ class GitBranchIndicator extends StatelessComponent {
   Component build(BuildContext context) {
     final theme = VideTheme.of(context);
     final gitStatusAsync = context.watch(gitStatusStreamProvider(repoPath));
-    final gitStatus = gitStatusAsync.valueOrNull;
+    final gitStatus = gitStatusAsync.value;
     final isWorktreeAsync = context.watch(isWorktreeProvider(repoPath));
-    final isWorktree = isWorktreeAsync.valueOrNull ?? false;
+    final isWorktree = isWorktreeAsync.value ?? false;
 
     if (gitStatus == null) {
       return SizedBox();

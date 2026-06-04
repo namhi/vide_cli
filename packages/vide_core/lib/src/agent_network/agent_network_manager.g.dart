@@ -45,7 +45,7 @@ final class AgentNetworkManagerProvider
 }
 
 String _$agentNetworkManagerHash() =>
-    r'e30d85a9f0ab6eecdb6fd9e009ecc3aa1dda6a68';
+    r'9c0c2abf69d6888e6a5db8b0e3cf43fb22955454';
 
 /// Provider for the agent network manager.
 

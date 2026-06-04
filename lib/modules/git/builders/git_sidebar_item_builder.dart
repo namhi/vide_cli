@@ -206,7 +206,7 @@ class GitSidebarItemBuilder {
 
     // Get current branch for base options
     final gitStatusAsync = context.watch(gitStatusStreamProvider(repoPath));
-    final currentBranch = gitStatusAsync.valueOrNull?.branch ?? 'main';
+    final currentBranch = gitStatusAsync.value?.branch ?? 'main';
 
     // New branch action with optional branch selection
     items.add(
@@ -255,19 +255,19 @@ class GitSidebarItemBuilder {
     // Always include current worktree first (even if no worktrees cached yet)
     // Resolve the actual worktree path - CWD might be a subdirectory
     final resolvedCurrentPath = findCurrentWorktreePath() ?? repoPath;
-    final gitStatus = gitStatusAsync.valueOrNull;
+    final gitStatus = gitStatusAsync.value;
 
     // Check if resolved path is a worktree
     final isCurrentWorktreeAsync = context.watch(
       isWorktreeProvider(resolvedCurrentPath),
     );
-    final isCurrentPathWorktree = isCurrentWorktreeAsync.valueOrNull ?? false;
+    final isCurrentPathWorktree = isCurrentWorktreeAsync.value ?? false;
 
     // Get main repo path to identify which worktrees are actual worktrees
     final mainRepoPathAsync = context.watch(
       mainRepoPathProvider(resolvedCurrentPath),
     );
-    final mainRepoPath = mainRepoPathAsync.valueOrNull;
+    final mainRepoPath = mainRepoPathAsync.value;
 
     // Ensure worktrees are loaded
     if (cachedBranches == null && !branchesLoading) {
@@ -298,7 +298,7 @@ class GitSidebarItemBuilder {
           final statusAsync = context.watch(
             gitStatusStreamProvider(worktree.path),
           );
-          wtStatus = statusAsync.valueOrNull;
+          wtStatus = statusAsync.value;
         }
 
         // Determine if this entry is a worktree (not the main repo)
@@ -616,7 +616,7 @@ class GitSidebarItemBuilder {
       GitStatus? status;
       if (isRepoExpanded(repo.path)) {
         final statusAsync = context.watch(gitStatusStreamProvider(repo.path));
-        status = statusAsync.valueOrNull;
+        status = statusAsync.value;
       }
 
       items.addAll(_buildRepoSection(context, repo, status));
